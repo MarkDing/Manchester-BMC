@@ -205,23 +205,23 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-[MC_Bit]:https://raw.github.com/MarkDing/Manchester-BMC/images/mc-bit.png
-[MC_Encoder]:https://raw.github.com/MarkDing/Manchester-BMC/images/Manchester-encoder-CLU.png
-[MC_EN_Waveform]:https://raw.github.com/MarkDing/Manchester-BMC/images/mc-en-waveform.png
-[MC_DE_Clock]:https://raw.github.com/MarkDing/Manchester-BMC/images/mc-de-clk.png
-[MC_DE_Trigger]:https://raw.github.com/MarkDing/Manchester-BMC/images/mc-de-trigger.png
-[MC_DE_TMR_Control]:https://raw.github.com/MarkDing/Manchester-BMC/images/mc-de-tmr-ctrl.png
-[MC_DE_Implementation]:https://raw.github.com/MarkDing/Manchester-BMC/images/Manchester-decoder-CLU.png
-[MC_DE_Waveform]:https://raw.github.com/MarkDing/Manchester-BMC/images/mc-de-waveform.png
-[BMC_Data]:https://raw.github.com/MarkDing/Manchester-BMC/images/bmc-data.png
-[BMC_EN_Transition_Data1]:https://raw.github.com/MarkDing/Manchester-BMC/images/bmc-circuit4transition-data1.png
-[BMC_EN_Waveform_Transitions_Data1]:https://raw.github.com/MarkDing/Manchester-BMC/images/bmc-en-waveform-transition-data1.png
-[BMC_EN_Transition_Everybit]:https://raw.github.com/MarkDing/Manchester-BMC/images/bmc-en-transition-everybit.png
-[BMC_EN_Implementation]:https://raw.github.com/MarkDing/Manchester-BMC/images/BMC-encoder-CLU.png
-[BMC_EN_Waveform]:https://raw.github.com/MarkDing/Manchester-BMC/images/bmc-en-waveform.png
-[BMC_DE_Method]:https://raw.github.com/MarkDing/Manchester-BMC/images/bmc-de-method.png
-[BMC_DE_Timer_Control]:https://raw.github.com/MarkDing/Manchester-BMC/images/bmc-de-tmr-ctrl.png
-[BMC_Data_Clock_Generation]:https://raw.github.com/MarkDing/Manchester-BMC/images/bmc-de-data-clock-generation.png
-[BMC_DE_Implementaion]:https://raw.github.com/MarkDing/Manchester-BMC/images/BMC-decoder-CLU.png
-[BMC_DE_Waveform]:https://raw.github.com/MarkDing/Manchester-BMC/images/bmc-de-waveform.png
+[MC_Bit]:https://raw.github.com/MarkDing/Manchester-BMC/master/images/mc-bit.png
+[MC_Encoder]:https://raw.github.com/MarkDing/Manchester-BMC/master/images/Manchester-encoder-CLU.png
+[MC_EN_Waveform]:https://raw.github.com/MarkDing/Manchester-BMC/master/images/mc-en-waveform.png
+[MC_DE_Clock]:https://raw.github.com/MarkDing/Manchester-BMC/master/images/mc-de-clk.png
+[MC_DE_Trigger]:https://raw.github.com/MarkDing/Manchester-BMC/master/images/mc-de-trigger.png
+[MC_DE_TMR_Control]:https://raw.github.com/MarkDing/Manchester-BMC/master/images/mc-de-tmr-ctrl.png
+[MC_DE_Implementation]:https://raw.github.com/MarkDing/Manchester-BMC/master/images/Manchester-decoder-CLU.png
+[MC_DE_Waveform]:https://raw.github.com/MarkDing/Manchester-BMC/master/images/mc-de-waveform.png
+[BMC_Data]:https://raw.github.com/MarkDing/Manchester-BMC/master/images/bmc-data.png
+[BMC_EN_Transition_Data1]:https://raw.github.com/MarkDing/Manchester-BMC/master/images/bmc-circuit4transition-data1.png
+[BMC_EN_Waveform_Transitions_Data1]:https://raw.github.com/MarkDing/Manchester-BMC/master/images/bmc-en-waveform-transition-data1.png
+[BMC_EN_Transition_Everybit]:https://raw.github.com/MarkDing/Manchester-BMC/master/images/bmc-en-transition-everybit.png
+[BMC_EN_Implementation]:https://raw.github.com/MarkDing/Manchester-BMC/master/images/BMC-encoder-CLU.png
+[BMC_EN_Waveform]:https://raw.github.com/MarkDing/Manchester-BMC/master/images/bmc-en-waveform.png
+[BMC_DE_Method]:https://raw.github.com/MarkDing/Manchester-BMC/master/images/bmc-de-method.png
+[BMC_DE_Timer_Control]:https://raw.github.com/MarkDing/Manchester-BMC/master/images/bmc-de-tmr-ctrl.png
+[BMC_Data_Clock_Generation]:https://raw.github.com/MarkDing/Manchester-BMC/master/images/bmc-de-data-clock-generation.png
+[BMC_DE_Implementaion]:https://raw.github.com/MarkDing/Manchester-BMC/master/images/BMC-decoder-CLU.png
+[BMC_DE_Waveform]:https://raw.github.com/MarkDing/Manchester-BMC/master/images/bmc-de-waveform.png
 
