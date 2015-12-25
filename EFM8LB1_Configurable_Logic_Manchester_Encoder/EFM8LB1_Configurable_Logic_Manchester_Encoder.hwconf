@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="ASCII"?>
+<device:XMLDevice xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:device="http://www.silabs.com/sls/hc/document/device.ecore" name="EFM8LB12F64E-A-QFN32" partId="com.silabs.mcu.si8051.efm8lb1_g.efm8lb12f64e">
+  <mode name="DefaultMode">
+    <property object="CLOCK_0" propertyId="ABPeripheral.included" value="true"/>
+    <property object="CLOCK_0" propertyId="clock.clockselect.clocksourcedivider" value="SYSCLK / 1"/>
+    <property object="CLU_0" propertyId="ABPeripheral.included" value="true"/>
+    <property object="CLU_0" propertyId="clu.dflipflopconfiguration.clockselection" value="The MXA input"/>
+    <property object="CLU_0" propertyId="clu.enable.enableclu#" value="Enabled"/>
+    <property object="CLU_0" propertyId="clu.multiplexer.ainput" value="CLU0A.10 (P0.4)"/>
+    <property object="CLU_0" propertyId="clu.multiplexer.binput" value="CLU0B.11 (P0.7)"/>
+    <property object="CLU_1" propertyId="ABPeripheral.included" value="true"/>
+    <property object="CLU_1" propertyId="clu.dflipflopconfiguration.clockinvert" value="Invert Clock"/>
+    <property object="CLU_1" propertyId="clu.dflipflopconfiguration.clockselection" value="SYSCLK"/>
+    <property object="CLU_1" propertyId="clu.enable.enableclu#" value="Enabled"/>
+    <property object="CLU_1" propertyId="clu.multiplexer.ainput" value="CLU1A.8 (P0.4)"/>
+    <property object="CLU_1" propertyId="clu.outputconfiguration.portoutputenable" value="Enable"/>
+    <property object="CLU_2" propertyId="ABPeripheral.included" value="true"/>
+    <property object="CLU_3" propertyId="ABPeripheral.included" value="true"/>
+    <property object="CL_0" propertyId="ABPeripheral.included" value="true"/>
+    <property object="CL_0" propertyId="cl.configurablelogicenable0.enableclu0" value="Enabled"/>
+    <property object="CL_0" propertyId="cl.configurablelogicenable0.enableclu1" value="Enabled"/>
+    <property object="CROSSBAR0" propertyId="xbar0.spi0.clockdata" value="Enabled"/>
+    <property object="DefaultMode" propertyId="mode.diagramLocation" value="100, 100"/>
+    <property object="P0.0" propertyId="ports.settings.skip" value="Skipped"/>
+    <property object="P0.1" propertyId="ports.settings.skip" value="Skipped"/>
+    <property object="P0.2" propertyId="ports.settings.skip" value="Skipped"/>
+    <property object="P0.3" propertyId="ports.settings.skip" value="Skipped"/>
+    <property object="P0.4" propertyId="ports.settings.iomode" value="Digital Push-Pull Output"/>
+    <property object="P0.4" propertyId="ports.settings.outputmode" value="Push-pull"/>
+    <property object="P0.6" propertyId="ports.settings.skip" value="Skipped"/>
+    <property object="P0.7" propertyId="ports.settings.iomode" value="Digital Push-Pull Output"/>
+    <property object="P0.7" propertyId="ports.settings.outputmode" value="Push-pull"/>
+    <property object="P1.0" propertyId="ports.settings.iomode" value="Digital Push-Pull Output"/>
+    <property object="P1.0" propertyId="ports.settings.outputmode" value="Push-pull"/>
+    <property object="P1.0" propertyId="ports.settings.skip" value="Skipped"/>
+    <property object="PBCFG_0" propertyId="pbcfg.settings.enablecrossbar" value="Enabled"/>
+    <property object="SPI_0" propertyId="ABPeripheral.included" value="true"/>
+    <property object="SPI_0" propertyId="spi.clockrate.spiclockfrequencyactual" value="765.625 kHz"/>
+    <property object="SPI_0" propertyId="spi.clockrate.spiclockfrequencytarget" value="765625"/>
+    <property object="SPI_0" propertyId="spi.clockrate.sysclk" value="24.500 MHz"/>
+    <property object="SPI_0" propertyId="spi.clockrate.sysclkdividercoefficientspi0ckr" value="15"/>
+    <property object="SPI_0" propertyId="spi.configuration.enablemastermode" value="Enable"/>
+    <property object="SPI_0" propertyId="spi.configuration.spimode" value="Master"/>
+    <property object="SPI_0" propertyId="spi.control.slaveselectmode" value="Slave or master 3-wire mode"/>
+    <property object="SPI_0" propertyId="spi.control.spienable" value="Enabled"/>
+    <property object="SPI_0" propertyId="spi.view.view" value="Advanced"/>
+    <property object="WDT_0" propertyId="ABPeripheral.included" value="true"/>
+    <property object="WDT_0" propertyId="wdt.watchdogcontrol.wdtenable" value="Disable"/>
+  </mode>
+  <modeTransition>
+    <property object="RESET &#x2192; DefaultMode" propertyId="modeTransition.target" value="DefaultMode"/>
+    <property object="RESET &#x2192; DefaultMode" propertyId="modeTransition.source" value="RESET"/>
+  </modeTransition>
+</device:XMLDevice>
