@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Manchester-bmc by MarkDing</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Manchester-bmc</h1>
+      <h2 class="project-tagline">Manchester and Biphase Mark Code(BMC) Encoder/Decoder implementation with EFM8LB1 CLU</h2>
+      <a href="https://github.com/MarkDing/Manchester-BMC" class="btn">View on GitHub</a>
+      <a href="https://github.com/MarkDing/Manchester-BMC/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/MarkDing/Manchester-BMC/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h1>
+<a id="implementing-manchester-and-bmc-encoderdecoder-on-efm8lb1" class="anchor" href="#implementing-manchester-and-bmc-encoderdecoder-on-efm8lb1" aria-hidden="true"><span class="octicon octicon-link"></span></a>Implementing Manchester and BMC encoder/decoder on EFM8LB1</h1>
+
+<h2>
+<a id="1-introduction" class="anchor" href="#1-introduction" aria-hidden="true"><span class="octicon octicon-link"></span></a>1. Introduction</h2>
+
+<p>The Manchester code and Biphase Mark Code(BMC) are popular line code which conveys the data and clock information. Here will introduce how to implement Manchester and BMC encoder/decoder on Silicon Labs EFM8LB1 with its Configurable Logic Units(CLU).</p>
+
+<h2>
+<a id="2-manchester-code" class="anchor" href="#2-manchester-code" aria-hidden="true"><span class="octicon octicon-link"></span></a>2. Manchester code</h2>
+
+<p>Manchester Code is widely used(e.G., In 10BASE-T Ethernet(IEEE802.3)). The encoding of each bit is either low then high, or high then low, of equal time. For IEEE802.3 standard, "1" is represented by a rising edge. "0" is represented by a failing edge. It has no DC component, and is self-clocking. </p>
+
+<p><img src="https://raw.github.com/MarkDing/Manchester-BMC/master/images/mc-bit.png" alt="MC Bit"></p>
+
+<p><strong>Figure 1 Manchester Bit Data (IEEE802.3)</strong></p>
+
+<h3>
+<a id="21-manchester-encoder" class="anchor" href="#21-manchester-encoder" aria-hidden="true"><span class="octicon octicon-link"></span></a>2.1. Manchester Encoder</h3>
+
+<p>It is easy to generate Manchester encoded data by XOR SPI MOSI and SCK signals. The SCK phase and polarity setting (CKPOL = 0, CKPHA = 1). the EFM8LB1 CLU setting to implement Manchester Encoder as follows.</p>
+
+<p><img src="https://raw.github.com/MarkDing/Manchester-BMC/master/images/Manchester-encoder-CLU.png" alt="MC Encoder"></p>
+
+<p><strong>Figure 2 Manchester Encoder</strong></p>
+
+<p>The CLU configuration code as follows:</p>
+
+<div class="highlight highlight-source-c"><pre>SFRPAGE = 0x20;
+<span class="pl-c">/* MXA as P0.4, MXB as P0.7*/</span>
+CLU0MX = 0xAB; 
+CLU0FN = LUT_XOR(SI_LUT_A, SI_LUT_B); 
+CLU0CF = CLU0CF_OEN__ENABLE |         CLU0CF_OUTSEL__LUT;
+CLEN0 |= CLEN0_C0EN__ENABLE;
+SFRPAGE = <span class="pl-c1">0</span>;</pre></div>
+
+<p>The Manchester Encoder waveform is shown as follows: </p>
+
+<p><img src="https://raw.github.com/MarkDing/Manchester-BMC/master/images/mc-en-waveform.png" alt="MC Encoder Waveform"></p>
+
+<p><strong>Figure 3 Manchester Encoder Waveform</strong></p>
+
+<p>From the waveform, when MOSI = 0, the XORed output follows SCK, it is failing edge = '0'; When MOSI = 1, the XORed output is an inverted SCK, it is rising edge = '1'. </p>
+
+<h3>
+<a id="22-manchester-decoder" class="anchor" href="#22-manchester-decoder" aria-hidden="true"><span class="octicon octicon-link"></span></a>2.2. Manchester Decoder</h3>
+
+<p>The Manchester bit value is presented in the second half of each bit time. Here we can generate a clock to capture the value at second half of bit time. The transition in middle of  each bit triggers timer with 3/8 bit time. Generating SCK rising edge when timer overflow. Generating SCK failing edge when timer overflow again and stop the timer. Repeat above steps for rest bits. </p>
+
+<p><img src="https://raw.github.com/MarkDing/Manchester-BMC/master/images/mc-de-clk.png" alt="MC Decoder Clock"></p>
+
+<p><strong>Figure 4 Manchester Decoder Clock Generation</strong></p>
+
+<p>How to trigger the Timer at Manchester middle transition? First, Generating latch data by capturing the data at 6/8 bit time. Second, Manchester data XOR latch data to get rising edge at middle transition. The XOR result at 6/8 bit must be ‘0’, because latch data captures same MC data. And then at middle transition, the XOR result change to ‘1” and generate rising edge.  Now we got the rising edge of middle transition, this is can be used to trigger Timer with D flip-flop to start with 3/8 bit time.</p>
+
+<p><img src="https://raw.github.com/MarkDing/Manchester-BMC/master/images/mc-de-trigger.png" alt="MC Decoder Clock Trigger"></p>
+
+<p><strong>Figure 5 Manchester Decoder Clock Trigger Signal Generator</strong></p>
+
+<p>How to control Timer? The MC XOR LDAT rising edge start timer.  Timer stops after 6/8 bit time.  From the observation on the timing diagram, we can get Boolean Equation is F = A NOR B. Where the A represents MC XOR LDAT, B represents SCK. The F represents TMR2 Force reload signal.</p>
+
+<p><img src="https://raw.github.com/MarkDing/Manchester-BMC/master/images/mc-de-tmr-ctrl.png" alt="MC Decoder Timer Control"></p>
+
+<p><strong>Figure 6 Manchester Decoder Timer Control</strong></p>
+
+<p>This is implementation of Manchester Decoder. It uses four CLUs. The CLU2 uses internal D flip-flop, MC as D input, output is Latch MC, Clock source is carry from CLU1. The CLU1 uses internal D flip-flop too, it generates clock signal, the D flip-flop clock source comes from Timer 2 overflow signal. CLU3 buffer MC data and output as carry signal of CLU0. the CLU0 combine three inputs MC, Latched MC and Clock to generate Timer2 force reload signal. </p>
+
+<p><img src="https://raw.github.com/MarkDing/Manchester-BMC/master/images/Manchester-decoder-CLU.png" alt="MC Decoder Implementation"></p>
+
+<p><strong>Figure 7 Manchester Decoder Implementation</strong></p>
+
+<div class="highlight highlight-source-c"><pre>CLU0MX = CLU0MX_MXA__CLU0A1 | CLU0MX_MXB__CLU0B2;
+CLU0CF = CLU0CF_OUTSEL__LUT | CLU0CF_OEN__ENABLE;
+CLU0FN = LUT_NOR(SI_LUT_A, LUT_XOR(SI_LUT_B, SI_LUT_C));
+
+CLU1MX = CLU1MX_MXA__CLU1A1 | CLU1MX_MXB__CLU1B1;
+CLU1CF = CLU1CF_OEN__ENABLE | CLU1CF_CLKSEL__ALTCLK;
+CLU1FN = LUT_NOT(SI_LUT_A);
+
+CLU2MX = CLU2MX_MXA__CLU2A0 | CLU2MX_MXB__CLU2B8;
+CLU2CF = CLU2CF_CLKSEL__CARRY_IN | CLU2CF_OEN__ENABLE;
+CLU2FN = SI_LUT_B;
+
+CLU3MX = 0x00; 
+CLU3CF = CLU3CF_OUTSEL__LUT | CLU3CF_OEN__ENABLE;
+CLU3FN = SI_LUT_C;
+
+CLEN0   = 0x0F; <span class="pl-c">// enable CLU0, CLU1, CLU2, CLU3</span></pre></div>
+
+<p>The overall view on all related signals of Manchester Decoder as follows.</p>
+
+<p><img src="https://raw.github.com/MarkDing/Manchester-BMC/master/images/mc-de-waveform.png" alt="MC Decoder Waveform"></p>
+
+<p><strong>Figure 8 Manchester Decoder Waveform</strong></p>
+
+<h2>
+<a id="3-biphase-mark-code" class="anchor" href="#3-biphase-mark-code" aria-hidden="true"><span class="octicon octicon-link"></span></a>3. Biphase Mark Code</h2>
+
+<p>Biphase Mark Code(BMC) uses the presence or absence of transitions to indicate logical value. BMC transitions on every positive edge of the clock signal BMC transitions on negative edge of the clock signal when the data is a 1.</p>
+
+<p><img src="https://raw.github.com/MarkDing/Manchester-BMC/master/images/bmc-data.png" alt="BMC Data"></p>
+
+<p><strong>Figure 9 BMC Data</strong></p>
+
+<h3>
+<a id="31-bmc-encoder" class="anchor" href="#31-bmc-encoder" aria-hidden="true"><span class="octicon octicon-link"></span></a>3.1. BMC Encoder</h3>
+
+<p>To encode the BMC data, first at all, generating transition for data 1.  Here we choose a way to XOR Data and Q1,  where Q1 is the D flip-flop output, and Q1 XOR Data as the input of D flip-flop. When data is 1, at first half bit time, the Q1 ^ Data = Not Q1. At the failing edge of clock, the Q1 captures the Not Q1, which generate a transition at middle bit time. When the data is 0, the Q1 keeps unchanged, no transition happens. </p>
+
+<p><img src="https://raw.github.com/MarkDing/Manchester-BMC/master/images/bmc-circuit4transition-data1.png" alt="BMC Encoder Transition Data 1"></p>
+
+<p><strong>Figure 10 BMC Encoder Transitions on Data 1</strong></p>
+
+<p>And the waveform of transitions on data 1 is shown as follows:</p>
+
+<p><img src="https://raw.github.com/MarkDing/Manchester-BMC/master/images/bmc-en-waveform-transition-data1.png" alt="BMC Encoder Waveform of Transition Data 1"></p>
+
+<p><strong>Figure 10 BMC Encoder Waveform of Transitions on Data 1</strong></p>
+
+<p>From the timing diagram, we can see the D flip-flop captures the Q1 XOR Data at failing edge of clock. For data = 1, there is a  transition at the time, for data = 0, there is not transition at the time. And also we notice that Q1 keeps unchanged at the beginning of each bit, the D flip-flop maintains the Q value before the rising edge of the clock. </p>
+
+<p>The second step, we need to generate transition at beginning of each bit.  The idea here is that we flip first bit, and keeps second bit unchanged, and then flip third bit, and keep fourth bit unchanged, etc.  So we use Q2 which is the clock by 2 and XOR the Q1 to generate BMC data.  When Q2 is 1, the Q1 ^ 1 = Not Q1, it makes transition. When Q2 is 0, the Q1 ^ 0 = Q1, it changes nothing. And finally, we get BMC data with transitions at beginning of every bit.  And also transition at middle bit when data is 1. </p>
+
+<p><img src="https://raw.github.com/MarkDing/Manchester-BMC/master/images/bmc-en-transition-everybit.png" alt="BMC Encoder Transition of Every Bit"></p>
+
+<p><strong>Figure 11 BMC Encoder Transitions at Beginning of Every Bit</strong></p>
+
+<p>Here is the implementation of the BMC Encoder. It uses four CLUs. For CLU0, it generates Q2 which is the clock divided by 2. For CLU1 and CLU3, they generate Q1 which contains transition at middle bit time when data is 1. The CLU2 XOR the Q1 and Q2, output the BMC encoding data.</p>
+
+<p><img src="https://raw.github.com/MarkDing/Manchester-BMC/master/images/BMC-encoder-CLU.png" alt="BMC Encoder Implementation"></p>
+
+<p><strong>Figure 12 BMC Encoder Implementation</strong></p>
+
+<p>Here are all signals waveform we talked previously. </p>
+
+<p><img src="https://raw.github.com/MarkDing/Manchester-BMC/master/images/bmc-en-waveform.png" alt="BMC Encoder Waveform"></p>
+
+<p><strong>Figure 13 BMC Encoder Waveform</strong></p>
+
+<h3>
+<a id="32-bmc-decoder" class="anchor" href="#32-bmc-decoder" aria-hidden="true"><span class="octicon octicon-link"></span></a>3.2. BMC Decoder</h3>
+
+<p>The BMC decoder needs more logical circuitry, base one the resource we have in one EFM8LB1 device, here we made a solution to decode the BMC data with minimums hardware resources we can.   As we talked in previous slides. The BMC transition at beginning of each bit or middle or bit when data = 1. Here is the timing diagram of BMC, From the observation, we capture the data at 6/8 bit time.  When the value between first sample point and second sample point is same, that means second bit is “1”.  That is because the transition happens twice at bit boundary and middle of second bit. When the value between first sample point and second sample is difference, that means second b it is “0”. That is because the transition happens once, at bit boundary. Base on above analysis. We can use XNOR two sample points value to generate data which apart from 6/8 bit time compare with BMC data. And using a timer to generate SCK which rising edge at beginning of each bit. </p>
+
+<p><img src="https://raw.github.com/MarkDing/Manchester-BMC/master/images/bmc-de-method.png" alt="BMC Decoder Method"></p>
+
+<p><strong>Figure 14 BMC Decoder Method</strong></p>
+
+<p>The Timer control is very important in BMC decoder design. The Timers are used to capture the data and generate clock.  Here is the requirement on Timer setting, Timer starts from beginning of each bit, and Timer stops at 6/8 bit time. To achieve the functionality, we choose two signals to control Timer: Timer OVF signal, and BMC XNOR prior BMC 6/8 bit value.  The Time OVF is low at beginning of the bit since it is stop. It can be used to start timer when BMC XNOR PBMC change to 0 at beginning of each bit. The XNOR result start from 6/8 bit time must be “1”, since it is same value after capturing data at that point. It can be use to stop timer.  </p>
+
+<p><img src="https://raw.github.com/MarkDing/Manchester-BMC/master/images/bmc-de-tmr-ctrl.png" alt="BMC Decoder Timer Control"></p>
+
+<p><strong>Figure 15 BMC Decoder Timer Control</strong></p>
+
+<p>Here is the timing diagram on clock and data generation. BMC data XNOR prior BMC value at 6/8 bit time to generate Data.  And the Timer force reload signal can be inversed as clock. The SCK second edge to capture the data which is beginning of each bit of BMC data. </p>
+
+<p><img src="https://raw.github.com/MarkDing/Manchester-BMC/master/images/bmc-de-data-clock-generation.png" alt="BMC Decoder Data and Clock Generation"></p>
+
+<p><strong>Figure 16 BMC Decoder Data and Clock Generation</strong></p>
+
+<p>Here is the CLU implementation for BMC decoder. The CLU0 act as a selector,  the Boolean expression is BC + B’A. It selects T2OVF or Carry In which is XNOR result of BMC and PBMC,  the T2OVF is one clock after T4OVF, which make sure when T2OVF is high, the selector captures the value from Carry in is high. That is because after 6/8 bit time, the XNOR result must be high, which stops the Timers. the CLU0 output is Timer Reload force. The CLU1 invert CLU0 output as Clock output. The CLU2 and CLU3 are combined together to generate Data. When T4OVF happens, it generates on system clock width pulse. At rising edge, the CLU3 captures the XNOR result and output as Data; at failing edge, the CLU2 captures 6/8 bit time BMC value. And the XNOR result as carry in signal to CLU0 to control the Timer start-stop. </p>
+
+<p><img src="https://raw.github.com/MarkDing/Manchester-BMC/master/images/BMC-decoder-CLU.png" alt="BMC Decoder Implementation"></p>
+
+<p><strong>Figure 17 BMC Decoder Implementation</strong></p>
+
+<div class="highlight highlight-source-c"><pre>CLU0MX = 0x40; <span class="pl-c">// MXA as T2OVF, MXB as CLU0 output</span>
+CLU0CF = CLU0CF_OUTSEL__LUT;
+CLU0FN = LUT_OR(LUT_AND(SI_LUT_B, SI_LUT_C),
+            <span class="pl-en">LUT_AND</span>(LUT_NOT(SI_LUT_B), SI_LUT_A));
+
+CLU1MX = 0x00; <span class="pl-c">// MXA as CLU0 output</span>
+CLU1CF = CLU1CF_OEN__ENABLE | CLU1CF_OUTSEL__LUT;
+CLU1FN = LUT_NOT(SI_LUT_A);
+
+CLU2MX = 0x48; <span class="pl-c">// MXA as T4OVF, MXB as P0.2</span>
+CLU2CF = CLU2CF_CLKINV__INVERT | CLU2CF_CLKSEL__MXA_INPUT;
+CLU2FN = SI_LUT_B;
+
+CLU3MX = 0x22; <span class="pl-c">// MXA as CLU2 output;</span>
+CLU3CF = CLU3CF_OEN__ENABLE | CLU3CF_CLKSEL__ALTCLK;
+CLU3FN = LUT_XNOR(SI_LUT_A, SI_LUT_C);
+
+CLEN0   = 0x0F; <span class="pl-c">// enable CLU0, CLU1, CLU2, CLU3</span></pre></div>
+
+<p>Here are the BMC data, SPI SCK, MOSI signals waveform.  We can see the data start from 6/8 bit time compare with BMC data. The MOSI data is valid on second edge of SCK period (PHA=1). </p>
+
+<p><img src="https://raw.github.com/MarkDing/Manchester-BMC/master/images/bmc-de-waveform.png" alt="BMC Decoder Waveform"></p>
+
+<p><strong>Figure 18 BMC Decoder Waveform</strong></p>
+
+<h2>
+<a id="4-license" class="anchor" href="#4-license" aria-hidden="true"><span class="octicon octicon-link"></span></a>4. LICENSE</h2>
+
+<p>The MIT License (MIT)</p>
+
+<p>Copyright (c) 2015 Mark Ding(<a href="mailto:mark.ding@hotmail.com">mark.ding@hotmail.com</a>)</p>
+
+<p>Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sub-license, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:</p>
+
+<p>The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.</p>
+
+<p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/MarkDing/Manchester-BMC">Manchester-bmc</a> is maintained by <a href="https://github.com/MarkDing">MarkDing</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+            <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-000000-01");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+  </body>
+</html>
